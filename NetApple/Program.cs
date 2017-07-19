@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 
 namespace NetApple
@@ -20,7 +21,6 @@ namespace NetApple
             var set = new JsonSerializerSettings();
             var text = File.ReadAllText(parms.First(), Encoding.UTF8);
             var config = JsonConvert.DeserializeObject<AppleConfig>(text, set);
-            var exe = Path.GetFullPath("mkisofs.exe");
             var args = new List<string>();
             args.Add("-V");
             args.Add(config.BundleName);
@@ -31,6 +31,8 @@ namespace NetApple
             args.Add("-o");
             args.Add(config.DiskImageFile);
             args.Add(config.BuildDirectory);
+            var dir = Path.GetDirectoryName(typeof(Program).Assembly.Location);
+            var exe = Path.Combine(dir, "mkisofs.exe");
             var info = new ProcessStartInfo
             {
                 FileName = exe,
