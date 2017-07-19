@@ -50,7 +50,8 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="mkisofs.exe">
+    <None Include="..\Tools\mkisofs.exe">
+      <Link>mkisofs.exe</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
