@@ -30,7 +30,8 @@ namespace NetApple
             args.Add("-no-pad");
             args.Add("-o");
             args.Add(config.DiskImageFile);
-            args.Add(config.BuildDirectory);
+            var buildDir = Environment.GetEnvironmentVariable("BUILD_DMG") ?? config.BuildDirectory;
+            args.Add(buildDir);
             var dir = Path.GetDirectoryName(typeof(Program).Assembly.Location);
             var exe = Path.Combine(dir, "mkisofs.exe");
             var info = new ProcessStartInfo
