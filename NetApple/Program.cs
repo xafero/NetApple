@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 
 namespace NetApple
@@ -23,17 +22,21 @@ namespace NetApple
             var config = JsonConvert.DeserializeObject<AppleConfig>(text, set);
             var args = new List<string>();
             args.Add("-V");
-            args.Add(config.BundleName);
+            args.Add(Quote(config.BundleName));
             args.Add("-D");
             args.Add("-R");
             args.Add("-apple");
             args.Add("-no-pad");
             args.Add("-o");
-            args.Add(config.DiskImageFile);
+            args.Add(Quote(config.DiskImageFile));
             var buildDir = Environment.GetEnvironmentVariable("BUILD_DMG") ?? config.BuildDirectory;
-            args.Add(buildDir);
+            args.Add(Quote(buildDir));
             var dir = Path.GetDirectoryName(typeof(Program).Assembly.Location);
-            var exe = Path.Combine(dir, "mkisofs.exe");
+            string exe;
+            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+                exe = Path.Combine(dir, "mkisofs.exe");
+            else
+                exe = "genisoimage";
             var info = new ProcessStartInfo
             {
                 FileName = exe,
@@ -55,6 +58,9 @@ namespace NetApple
                 return proc.ExitCode;
             }
         }
+
+        static string Quote(string text)
+            => text.StartsWith("\"") && text.EndsWith("\"") ? text : '"' + text + '"';
 
         static void Proc_ErrorDataReceived(object sender, DataReceivedEventArgs e)
         {
