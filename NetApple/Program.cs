@@ -20,6 +20,8 @@ namespace NetApple
             var set = new JsonSerializerSettings();
             var text = File.ReadAllText(parms.First(), Encoding.UTF8);
             var config = JsonConvert.DeserializeObject<AppleConfig>(text, set);
+            config.BuildDirectory = Environment.GetEnvironmentVariable("BUILD_DMG") ?? config.BuildDirectory;
+            WriteAppleApp(config);
             var args = new List<string>();
             args.Add("-V");
             args.Add(Quote(config.BundleName));
@@ -29,8 +31,7 @@ namespace NetApple
             args.Add("-no-pad");
             args.Add("-o");
             args.Add(Quote(config.DiskImageFile));
-            var buildDir = Environment.GetEnvironmentVariable("BUILD_DMG") ?? config.BuildDirectory;
-            args.Add(Quote(buildDir));
+            args.Add(Quote(config.AppTemp));
             var dir = Path.GetDirectoryName(typeof(Program).Assembly.Location);
             string exe;
             if (Environment.OSVersion.Platform == PlatformID.Win32NT)
@@ -57,6 +58,32 @@ namespace NetApple
                 proc.WaitForExit();
                 return proc.ExitCode;
             }
+        }
+
+        static void WriteAppleApp(AppleConfig config)
+        {
+            var appFolder = Path.Combine(config.AppTemp, $"{config.BundleName}.app");
+            Directory.CreateDirectory(appFolder);
+            var contentsFolder = Path.Combine(appFolder, "Contents");
+            Directory.CreateDirectory(contentsFolder);
+            var infoPlist = Path.Combine(contentsFolder, "Info.plist");
+            File.WriteAllText(infoPlist, "?", Encoding.UTF8);
+            var macOsFolder = Path.Combine(contentsFolder, "MacOS");
+            Directory.CreateDirectory(macOsFolder);
+            var shellFile = Path.Combine(macOsFolder, "MonoAppLauncher");
+            var shellLines = new List<string>
+            {
+                "#!/usr/bin/env bash",
+                "echo whoami"
+            };
+            File.WriteAllLines(shellFile, shellLines, Encoding.UTF8);
+            var resFolder = Path.Combine(contentsFolder, "Resources");
+            Directory.CreateDirectory(resFolder);
+            var iconFile = Path.Combine(resFolder, "app.icns");
+            File.Copy(config.AppIcon, iconFile, true);
+            var realRoot = Path.Combine(contentsFolder, "Mono");
+            Directory.CreateDirectory(realRoot);
+            IOHelper.CloneDirectory(config.BuildDirectory, realRoot);
         }
 
         static string Quote(string text)
