@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Text;
 
@@ -22,7 +23,8 @@ namespace NetApple
             var text = File.ReadAllText(parms.First(), Encoding.UTF8);
             var config = JsonConvert.DeserializeObject<AppleConfig>(text, set);
             config.BuildDirectory = Environment.GetEnvironmentVariable("BUILD_DMG") ?? config.BuildDirectory;
-            WriteAppleApp(config);
+            var dir = Path.GetDirectoryName(typeof(Program).Assembly.Location);
+            WriteAppleApp(config, dir);
             var args = new List<string>();
             args.Add("-V");
             args.Add(Quote(config.BundleName));
@@ -35,7 +37,6 @@ namespace NetApple
             args.Add("-o");
             args.Add(Quote(config.DiskImageFile));
             args.Add(Quote(config.AppTemp));
-            var dir = Path.GetDirectoryName(typeof(Program).Assembly.Location);
             string exe;
             if (Environment.OSVersion.Platform == PlatformID.Win32NT)
                 exe = Path.Combine(dir, "mkisofs.exe");
@@ -63,8 +64,9 @@ namespace NetApple
             }
         }
 
-        static void WriteAppleApp(AppleConfig config)
+        static void WriteAppleApp(AppleConfig config, string dir)
         {
+            ExtractGzip(config, dir);
             var appFolder = Path.Combine(config.AppTemp, $"{config.BundleName}.app");
             Directory.CreateDirectory(appFolder);
             var volicon = Path.Combine(config.AppTemp, ".volumeicon.icns");
@@ -92,6 +94,19 @@ namespace NetApple
             var realRoot = Path.Combine(contentsFolder, "Mono");
             Directory.CreateDirectory(realRoot);
             IOHelper.CloneDirectory(config.BuildDirectory, realRoot);
+        }
+
+        static void ExtractGzip(AppleConfig config, string dir)
+        {
+            foreach (var file in Directory.EnumerateFiles(dir, "*.gz", SearchOption.AllDirectories))
+            {
+                var fileName = Path.GetFileNameWithoutExtension(file);
+                var target = Path.Combine(config.AppTemp, fileName);
+                using (var input = File.OpenRead(file))
+                using (var gzip = new GZipStream(input, CompressionMode.Decompress))
+                using (var output = File.Create(target))
+                    gzip.CopyTo(output);
+            }
         }
 
         static void WriteApplePlist(Stream stream, AppleConfig config)
