@@ -20,5 +20,7 @@ namespace NetApple
         public string AppTemp { get; set; }
 
         public string AppIcon { get; set; }
+
+        public string Background { get; set; }
     }
 }

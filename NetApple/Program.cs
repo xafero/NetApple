@@ -71,6 +71,9 @@ namespace NetApple
             ExtractGzip(config.AppTemp, dir);
             var volicon = Path.Combine(config.AppTemp, ".volumeicon.icns");
             File.Copy(config.AppIcon, volicon, true);
+            var background = Path.Combine(config.AppTemp, ".background", "installer_background.jpg");
+            Directory.CreateDirectory(Path.GetDirectoryName(background));
+            File.Copy(config.Background, background, true);
             var contentsFolder = Path.Combine(appFolder, "Contents");
             Directory.CreateDirectory(contentsFolder);
             var infoPlist = Path.Combine(contentsFolder, "Info.plist");
