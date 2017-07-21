@@ -99,6 +99,7 @@ namespace NetApple
                 plist.Add("CFBundleExecutable", "MonoLauncher");
                 plist.Add("CFBundleHelpBookFolder", $"{config.BundleName} Help");
                 plist.Add("CFBundleHelpBookName", $"{config.BundleName} Help");
+                plist.Add("CFBundleGetInfoString", $"{config.BundleName} {config.BundleVersion}");
                 plist.Add("CFBundleIconFile", "app.icns");
                 plist.Add("CFBundleIdentifier", config.BundleId);
                 plist.Add("CFBundleInfoDictionaryVersion", "6.0");
