@@ -63,10 +63,10 @@ namespace NetApple
 
         static void WriteAppleApp(AppleConfig config)
         {
-            var volicon = Path.Combine(config.AppTemp, ".volumeicon.icns");
-            File.Copy(config.AppIcon, volicon, true);
             var appFolder = Path.Combine(config.AppTemp, $"{config.BundleName}.app");
             Directory.CreateDirectory(appFolder);
+            var volicon = Path.Combine(config.AppTemp, ".volumeicon.icns");
+            File.Copy(config.AppIcon, volicon, true);
             var contentsFolder = Path.Combine(appFolder, "Contents");
             Directory.CreateDirectory(contentsFolder);
             var infoPlist = Path.Combine(contentsFolder, "Info.plist");
