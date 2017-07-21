@@ -77,10 +77,11 @@ namespace NetApple
             var shellFile = Path.Combine(macOsFolder, "MonoAppLauncher");
             var shellLines = new List<string>
             {
-                "#!/bin/bash",
+                "#!/bin/sh",
                 "open ~"
             };
-            File.WriteAllText(shellFile, string.Join('\n' + "", shellLines), Encoding.UTF8);
+            var shellTxt = string.Join('\n' + "", shellLines).Trim();
+            File.WriteAllText(shellFile, shellTxt, Encoding.UTF8);
             var resFolder = Path.Combine(contentsFolder, "Resources");
             Directory.CreateDirectory(resFolder);
             var iconFile = Path.Combine(resFolder, "app.icns");
