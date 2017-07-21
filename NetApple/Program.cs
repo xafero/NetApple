@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Claunia.PropertyList;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -62,12 +63,15 @@ namespace NetApple
 
         static void WriteAppleApp(AppleConfig config)
         {
+            var volicon = Path.Combine(config.AppTemp, ".volumeicon.icns");
+            File.Copy(config.AppIcon, volicon, true);
             var appFolder = Path.Combine(config.AppTemp, $"{config.BundleName}.app");
             Directory.CreateDirectory(appFolder);
             var contentsFolder = Path.Combine(appFolder, "Contents");
             Directory.CreateDirectory(contentsFolder);
             var infoPlist = Path.Combine(contentsFolder, "Info.plist");
-            File.WriteAllText(infoPlist, "?", Encoding.UTF8);
+            using (var file = File.Create(infoPlist))
+                WriteApplePlist(file, config);
             var macOsFolder = Path.Combine(contentsFolder, "MacOS");
             Directory.CreateDirectory(macOsFolder);
             var shellFile = Path.Combine(macOsFolder, "MonoAppLauncher");
@@ -84,6 +88,38 @@ namespace NetApple
             var realRoot = Path.Combine(contentsFolder, "Mono");
             Directory.CreateDirectory(realRoot);
             IOHelper.CloneDirectory(config.BuildDirectory, realRoot);
+        }
+
+        static void WriteApplePlist(Stream stream, AppleConfig config)
+        {
+            using (stream)
+            {
+                var plist = new NSDictionary();
+                plist.Add("CFBundleDevelopmentRegion", "German");
+                plist.Add("CFBundleExecutable", "MonoLauncher");
+                plist.Add("CFBundleHelpBookFolder", $"{config.BundleName} Help");
+                plist.Add("CFBundleHelpBookName", $"{config.BundleName} Help");
+                plist.Add("CFBundleIconFile", "app.icns");
+                plist.Add("CFBundleIdentifier", config.BundleId);
+                plist.Add("CFBundleInfoDictionaryVersion", "6.0");
+                plist.Add("CFBundleName", config.BundleName);
+                plist.Add("CFBundleShortVersionString", config.BundleVersion);
+                var purl = new NSDictionary();
+                purl.Add("CFBundleURLName", $"{config.BundleName} URL");
+                var parray = new NSArray(new NSString(config.UrlPrefix));
+                purl.Add("CFBundleURLSchemes", parray);
+                var purls = new NSArray(purl);
+                plist.Add("CFBundleURLTypes", purls);
+                plist.Add("CFBundleVersion", config.BundleVersion);
+                plist.Add("LSApplicationCategoryType", "public.app-category.business");
+                plist.Add("LSMinimumSystemVersion", "10.7");
+                var pMinVer = new NSDictionary();
+                pMinVer.Add("i386", "10.7.0");
+                pMinVer.Add("x86_64", "10.7.0");
+                plist.Add("LSMinimumSystemVersionByArchitecture", pMinVer);
+                plist.Add("NSHumanReadableCopyright", config.Copyright);
+                PropertyListParser.SaveAsXml(plist, stream);
+            }
         }
 
         static string Quote(string text)
