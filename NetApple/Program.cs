@@ -66,9 +66,9 @@ namespace NetApple
 
         static void WriteAppleApp(AppleConfig config, string dir)
         {
-            ExtractGzip(config, dir);
             var appFolder = Path.Combine(config.AppTemp, $"{config.BundleName}.app");
             Directory.CreateDirectory(appFolder);
+            ExtractGzip(config.AppTemp, dir);
             var volicon = Path.Combine(config.AppTemp, ".volumeicon.icns");
             File.Copy(config.AppIcon, volicon, true);
             var contentsFolder = Path.Combine(appFolder, "Contents");
@@ -96,12 +96,12 @@ namespace NetApple
             IOHelper.CloneDirectory(config.BuildDirectory, realRoot);
         }
 
-        static void ExtractGzip(AppleConfig config, string dir)
+        static void ExtractGzip(string appTemp, string dir)
         {
             foreach (var file in Directory.EnumerateFiles(dir, "*.gz", SearchOption.AllDirectories))
             {
                 var fileName = Path.GetFileNameWithoutExtension(file);
-                var target = Path.Combine(config.AppTemp, fileName);
+                var target = Path.Combine(appTemp, fileName);
                 using (var input = File.OpenRead(file))
                 using (var gzip = new GZipStream(input, CompressionMode.Decompress))
                 using (var output = File.Create(target))
