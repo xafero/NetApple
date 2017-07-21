@@ -29,6 +29,8 @@ namespace NetApple
             args.Add("-D");
             args.Add("-R");
             args.Add("-apple");
+            args.Add("-file-mode");
+            args.Add("777");
             args.Add("-no-pad");
             args.Add("-o");
             args.Add(Quote(config.DiskImageFile));
