@@ -77,10 +77,10 @@ namespace NetApple
             var shellFile = Path.Combine(macOsFolder, "MonoAppLauncher");
             var shellLines = new List<string>
             {
-                "#!/usr/bin/env bash",
-                "echo whoami"
+                "#!/bin/bash",
+                "open ~"
             };
-            File.WriteAllLines(shellFile, shellLines, Encoding.UTF8);
+            File.WriteAllText(shellFile, string.Join('\n' + "", shellLines), Encoding.UTF8);
             var resFolder = Path.Combine(contentsFolder, "Resources");
             Directory.CreateDirectory(resFolder);
             var iconFile = Path.Combine(resFolder, "app.icns");
@@ -96,7 +96,7 @@ namespace NetApple
             {
                 var plist = new NSDictionary();
                 plist.Add("CFBundleDevelopmentRegion", "German");
-                plist.Add("CFBundleExecutable", "MonoLauncher");
+                plist.Add("CFBundleExecutable", "MonoAppLauncher");
                 plist.Add("CFBundleHelpBookFolder", $"{config.BundleName} Help");
                 plist.Add("CFBundleHelpBookName", $"{config.BundleName} Help");
                 plist.Add("CFBundleGetInfoString", $"{config.BundleName} {config.BundleVersion}");
