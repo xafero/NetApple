@@ -83,7 +83,8 @@ namespace NetApple
                 "open ~"
             };
             var shellTxt = string.Join('\n' + "", shellLines).Trim();
-            File.WriteAllText(shellFile, shellTxt, Encoding.UTF8);
+            var noBom = new UTF8Encoding(false);
+            File.WriteAllText(shellFile, shellTxt, noBom);
             var resFolder = Path.Combine(contentsFolder, "Resources");
             Directory.CreateDirectory(resFolder);
             var iconFile = Path.Combine(resFolder, "app.icns");
